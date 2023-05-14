@@ -1,0 +1,33 @@
+{
+	"folders": [
+		{
+			"path": "frontend"
+		},
+		{
+			"path": "backend"
+		},
+		{
+			"path": ".",
+			"name": "project_root"
+		}
+	],
+	"settings": {
+		"workbench.colorTheme": "Night Owl Theme",
+		"editor.formatOnSave": true,
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": true
+		},
+		"[javascript]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
+		"[python]": {
+			"editor.defaultFormatter": "ms-python.black-formatter"
+		}
+		},
+		"extensions": {
+		"recommendations": [
+			"esbenp.prettier-vscode",
+			"ms-python.python"
+		]
+	}
+}

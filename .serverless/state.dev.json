@@ -1,0 +1,15 @@
+{
+  "service": {
+    "id": "kj843c7"
+  },
+  "components": {
+    "frontend": {
+      "state": {
+        "detectedFrameworkVersion": "3.27.0"
+      },
+      "outputs": {
+        "ServerlessDeploymentBucketName": "frontend-dev-serverlessdeploymentbucket-1kzuv6wu3brkg"
+      }
+    }
+  }
+}

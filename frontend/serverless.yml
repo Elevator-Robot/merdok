@@ -1,0 +1,14 @@
+service: frontend
+
+provider:
+  name: aws
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+
+plugins:
+  - serverless-finch
+
+custom:
+  client:
+    bucketName: ${self:service}-${self:provider.stage}-client
+    distributionFolder: public
