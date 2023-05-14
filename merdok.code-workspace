@@ -4,7 +4,10 @@
 			"path": "frontend"
 		},
 		{
-			"path": "backend"
+			"path": "backend",
+			"python": {
+				"venvPath": ".venv"
+			}
 		},
 		{
 			"path": ".",

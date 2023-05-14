@@ -5,11 +5,54 @@ provider:
   name: aws
   runtime: python3.9
   stage: ${opt:stage, 'dev'}
+  stackName: ${self:service}-${self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: !GetAtt ConversationsTable.Arn
+
+custom:
+  # OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+  DYNAMODB_TABLE_NAME: ${self:service}-${opt:stage, self:provider.stage}
 
 functions:
   hello:
-    handler: handler.hello
+    handler: handler.lambda_handler
     events:
       - httpApi:
           path: /
           method: get
+    environment:
+      # OPENAI_API_KEY: ${self:custom.OPENAI_API_KEY}
+      DYNAMODB_TABLE_NAME: ${self:custom.DYNAMODB_TABLE_NAME}    
+
+plugins:
+  - serverless-python-requirements
+  - serverless-dynamodb-local
+
+resources:
+  Resources:
+    ConversationsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: conversationId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: conversationId
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.DYNAMODB_TABLE_NAME}
