@@ -12,7 +12,7 @@ provider:
     apiGateway: true
     lambda: true
   websocketsApiName: ${self:service}-${self:provider.stage}
-  websocketsApiRouteSelectionExpression: $request.body.action
+  # websocketsApiRouteSelectionExpression: $request.body.action
   websocketsDescription: Custom Serverless Websockets
   environment:
     DYNAMODB_CONVERSATIONS_TABLE_NAME: ${self:service}-${self:provider.stage}-conversations
@@ -40,7 +40,7 @@ custom:
   DOMAIN_NAME: elevator-robot.com
   pythonRequirements:
     layer: true
-    fileName: api/requirements.txt
+    fileName: requirements.txt
     dockerizePip: non-linux
     slim: true
     strip: false
@@ -48,7 +48,7 @@ custom:
 package:
   individually: true
   include:
-    - "api/"
+    - "src/**"
   exclude:
     - "node_modules/**"
     - "test/**"
@@ -63,21 +63,21 @@ package:
 
 functions:
   connect:
-    handler: api/handler.connect
+    handler: src/handler.connect
     layers:
       - { Ref: PythonRequirementsLambdaLayer }
     events:
       - websocket:
           route: $connect
   disconnect:
-    handler: api/handler.disconnect
+    handler: src/handler.disconnect
     layers:
       - { Ref: PythonRequirementsLambdaLayer }
     events:
       - websocket:
           route: $disconnect
   sendMessage:
-    handler: api/handler.send_message
+    handler: src/handler.send_message
     layers:
       - { Ref: PythonRequirementsLambdaLayer }
     events:

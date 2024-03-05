@@ -1,5 +1,12 @@
 import json
+from http import HTTPStatus
+
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler.exceptions import BadRequestError
+
+from aws_lambda_powertools.tracing import Tracer
 from database_operations import (
     store_connection,
     delete_connection,
@@ -9,28 +16,37 @@ from database_operations import (
 from openai_interface import generate_message, format_prompt
 
 
-logger = Logger(service="assistant")
+LOGGER: Logger = Logger()
+
+TRACER: Tracer = Tracer()
+APP: ApiGatewayResolver = ApiGatewayResolver()
 
 
-@logger.inject_lambda_context(log_event=True)
-def connect(event, context):
+@APP.post("/connect")  # type: ignore
+@LOGGER.inject_lambda_context(log_event=True)
+def connect(event, context: LambdaContext):
     """Handle connection event."""
-    connection_id = event["requestContext"]["connectionId"]
-    user_id = event.get("queryStringParameters", {}).get("userId", "defaultUserId")
-    store_connection(connection_id, user_id)
-    return {"statusCode": 200}
+    try:
+        connection_id = event["requestContext"]["connectionId"]
+        user_id = event.get("queryStringParameters", {}).get("userId", "defaultUserId")
+        store_connection(connection_id, user_id)
+        return {"statusCode": HTTPStatus.OK.value, "body": "Connected."}
+    except BadRequestError as err:
+        return {"statusCode": HTTPStatus.BAD_REQUEST.value, "body": str(err)}
 
 
-@logger.inject_lambda_context(log_event=True)
-def disconnect(event, context):
+@APP.post("/disconnect")  # type: ignore
+@LOGGER.inject_lambda_context(log_event=True)
+def disconnect(event, context: LambdaContext):
     """Handle disconnection event."""
     connection_id = event["requestContext"]["connectionId"]
     delete_connection(connection_id)
-    return {"statusCode": 200}
+    return {"statusCode": HTTPStatus.OK.value, "body": "Disconnected."}
 
 
-@logger.inject_lambda_context(log_event=True)
-def send_message(event, context):
+@APP.post("/send-message")  # type: ignore
+@LOGGER.inject_lambda_context(log_event=True)
+def send_message(event, context: LambdaContext) -> Response[str]:
     """Handle send_message event."""
     user_id = event.get("userId", "defaultUserId")
     body = json.loads(event.get("body", "") or "{}")
@@ -45,19 +61,22 @@ def send_message(event, context):
     ]
     conversation = retrieve_conversation(user_id, default_conversation)
     conversation.append({"role": "user", "content": user_message})
-    prompt = format_prompt(conversation)  # Define your format_prompt function based on your logic
+    prompt = format_prompt(
+        conversation
+    )  # Define your format_prompt function based on your logic
 
     generated_message = generate_message(prompt)
     conversation.append({"role": "assistant", "content": generated_message})
     update_conversation(user_id, conversation)
 
-    logger.debug(f"userId: {user_id}")
-    logger.debug(f"userMessage: {user_message}")
-    logger.debug(f"conversation: {conversation}")
-    logger.debug(f"prompt: {prompt}")
-    logger.debug(f"generatedMessage: {generated_message}")
+    LOGGER.debug(f"userId: {user_id}")
+    LOGGER.debug(f"userMessage: {user_message}")
+    LOGGER.debug(f"conversation: {conversation}")
+    LOGGER.debug(f"prompt: {prompt}")
+    LOGGER.debug(f"generatedMessage: {generated_message}")
 
-    return {
-        "statusCode": 200,
-        "body": json.dumps({"message": generated_message, "conversation": conversation}),
-    }
+    return Response(
+        status_code=HTTPStatus.OK.value,
+        headers={"Content-Type": "application/json"},
+        body=json.dumps({"message": generated_message, "conversation": conversation}),
+    )

@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "merdok"
+version = "0.1.0"
+description = "AI companion"
+authors = ["billy <aphexlog@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aws-lambda-powertools = "^2.34.2"
+openai = "^1.13.3"
+boto3 = "^1.34.55"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+typeCheckingMode = "strict"
+venvPath = "."
+venv = ".venv"
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.isort]
+atomic = true
+profile = "black"
+line_length = 88
+skip_gitignore = true
