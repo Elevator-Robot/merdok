@@ -1,4 +1,5 @@
 """Game Introduction Module"""
+import sys
 
 class GameIntroduction:
     def __init__(self):
@@ -6,7 +7,6 @@ class GameIntroduction:
 
     def shun_player(self):
         print("Cowardice does not become you. The world has no place for those who shirk from destiny. Begone, and let the true heroes forge their path without you.")
-        import sys
         sys.exit(0)
 
     def get_player_name(self):
