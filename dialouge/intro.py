@@ -1,8 +1,9 @@
-"""Game Introduction Module"""
+from characters.inventory import PlayerInventory
 
 class GameIntroduction:
     def __init__(self):
         self.player_name = ""
+        self.player_inventory = PlayerInventory()
 
     def shun_player(self):
         print("Cowardice does not become you. The world has no place for those who shirk from destiny. Begone, and let the true heroes forge their path without you.")
@@ -31,4 +32,3 @@ class GameIntroduction:
                 self.shun_player()
             else:
                 print("\nHesitation is but the first step towards defeat. The sands of time wait for no one. Choose wisely, for this is your final chance.")
-
