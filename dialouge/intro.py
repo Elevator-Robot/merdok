@@ -19,22 +19,34 @@ class GameIntroduction:
         print(f"\nWelcome, {self.player_name}! Your journey begins now. May the gods watch over you as you face the trials that await...")
 
     def set_weapon(self):
-        valid_weapons = ["sword", "bow", "staff", "axe"]
         while True:
-            weapon_choice = input("\nChoose your weapon (sword/bow/staff/axe): ").lower().strip()
-            if weapon_choice in valid_weapons:
-                if weapon_choice == "sword" or weapon_choice == "axe":
-                    self.player_inventory.add_weapon(weapon_choice, damage=4)
-                    print(f"\nYou feel the weight of the {weapon_choice} in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
-                elif weapon_choice == "bow":
-                    self.player_inventory.add_weapon(weapon_choice, damage=4)
+            weapon_choice = input("""
+                                \nChoose your weapon:
+                                \n 1: sword
+                                \n 2: bow
+                                \n 3: staff
+                                \n 4: axe
+                                \n Enter number:""").lower().strip()
+            match weapon_choice:
+                case "1":
+                    self.player_inventory.add_weapon("sword", damage=4)
+                    print("\nYou feel the weight of the sword in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
+                    break
+                case "2":
+                    self.player_inventory.add_weapon("axe", damage=4)
+                    print("\nYou feel the weight of the axe in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
+                    break
+                case "3":
+                    self.player_inventory.add_weapon("bow", damage=4)
                     print("\nYou feel the tension of the bowstring as you draw it back, the arrow poised to strike. +4 strength has been added to your stats.")
-                elif weapon_choice == "staff":
-                    self.player_inventory.add_weapon(weapon_choice, damage=4)
+                    break
+                case "4":
+                    self.player_inventory.add_weapon("staff", damage=4)
                     print("\nYou feel the power of the staff coursing through your veins, the magic within it waiting to be unleashed. +2 intellegence has been added to your stats.")
-                break
-            else:
-                print("\nThat is not a weapon of choice prisoner. Choose again.")
+                    break
+                case _:
+                    print("\nThat is not a valid weapon choice. Choose again.")
+                    continue
 
     def start_introduction(self):
         print("\nThe first thing you notice as you regain consciousness is the cold, unyielding stone beneath you. The air is thick with the scent of dust and decay, and the only sound is the distant echo of your own heartbeat.")
