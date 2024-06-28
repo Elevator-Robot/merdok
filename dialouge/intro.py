@@ -22,7 +22,7 @@ class GameIntroduction:
         while True:
             weapon_choice = input("\nChoose your weapon (sword/bow/staff): ").lower().strip()
             if weapon_choice in ["sword", "bow", "staff"]:
-                weapon = self.player_inventory.add_weapon(weapon_choice)
+                self.player_inventory.add_weapon(weapon_choice, damage=4)
                 print(f"\nYou feel the rush of power as you wield the {weapon_choice}. Blood rushes through your veins... +4 strength has been added to your stats.")
                 break
             else:
@@ -43,6 +43,8 @@ class GameIntroduction:
         print("\nFinally, you emerge into a vast, circular chamber, the walls lined with towering statues and the floor covered in sand and bloodstains. The crowd roars as you are led to the center of the arena, the sound echoing in your ears like thunder.")
         print("\nYou steel yourself for the battle to come, your heart pounding in your chest. The figure who spoke before steps forward once more, their voice ringing out over the crowd.")
         print("\n'Let the battle begin!'")
+
+        # name selection logic.
         # for attempt in range(3):
         #     response = input("\nDo you dare to embrace your destiny? (yes/no): ").lower().strip()
         #     if response == "yes":
