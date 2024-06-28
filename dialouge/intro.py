@@ -2,24 +2,17 @@ import sys
 import textwrap
 import time
 
+from characters import enemy, player
 from characters.inventory import PlayerInventory
+from dice.roll import Dice
 
 class GameIntroduction:
     def __init__(self):
         self.player_name = ""
         self.player_inventory = PlayerInventory()
-
-    def shun_player(self):
-        print("\nCowardice does not become you. The world has no place for those who shirk from destiny. Begone, and let the true heroes forge their path without you.")
-        sys.exit(0)
-
-    def get_player_name(self):
-        return self.player_name
-
-    def set_player_name(self):
-        self.player_name = input("\nEnter your name, hero: ")
-        print(f"\nWelcome, {self.player_name}! Your journey begins now. May the gods watch over you as you face the trials that await...")
-        time.sleep(2)
+        self.dice = Dice()
+        self.player = player.Player(health=10, name="Prisoner")
+        self.enemy = enemy.Enemy(health=10, name="Champion")
 
     def set_weapon(self):
         print("\n'You may choose 1 weapon to try and salvage your life... Choose wisely.'")
@@ -88,3 +81,38 @@ class GameIntroduction:
         self.set_weapon()
 
         self.continue_arena()
+
+        self.battle()
+
+    def battle(self):
+        print("\nYou stand in the center of the arena, your weapon at the ready, your heart pounding in your chest.")
+        time.sleep(2)
+
+        print("\nYour opponent emerges from the shadows, a massive, hulking figure clad in armor and wielding a wicked-looking blade.")
+        time.sleep(2)
+
+        print("\nYou steel yourself for the battle to come, your muscles tensed, your mind focused.")
+        time.sleep(2)
+
+        print("\nThe figure charges at you, their blade raised high, a battle cry on their lips.")
+        time.sleep(2)
+
+        print("\nYou raise your weapon to meet their attack, the clash of steel ringing out through the arena.")
+        time.sleep(2)
+
+        user_roll = self.dice.d20_roll()
+        print(f"\nYou roll a {user_roll}")
+        time.sleep(2)
+
+        enemy_roll = self.dice.d20_roll()
+        print(f"\nThe enemy rolls a {enemy_roll}")
+        time.sleep(2)
+
+        if user_roll > enemy_roll:
+            print("\nYou strike a mighty blow, the force of your attack sending your opponent reeling.")
+            self.enemy.take_damage(5)
+        elif user_roll < enemy_roll:
+            print("\nYour opponent's blade finds its mark, cutting through your defenses and drawing blood.")
+            self.player.take_damage(5)
+        else:
+            print("\nYour weapons clash, the two of you locked in a fierce struggle for dominance.")
