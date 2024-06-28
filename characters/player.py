@@ -27,7 +27,3 @@ if __name__ == "__main__":
     print(player)
     player.heal(5)
     print(player)
-    player.add_to_inventory("Sword")
-    print(player)
-    player.remove_from_inventory("Sword")
-    print(player)

@@ -132,5 +132,5 @@ dmypy.json
 cython_debug/
 
 # Player files
-player_inventory.py
-player_stats.py
+player_inventory.json
+player_stats.json
