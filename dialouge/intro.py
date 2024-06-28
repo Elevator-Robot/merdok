@@ -48,6 +48,13 @@ class GameIntroduction:
                     print("\nThat is not a valid weapon choice. Choose again.")
                     continue
 
+    def continue_arena(self):
+            print("\nThe arena floor trembles beneath the prisoner's feet as the gate at the opposite end creaks open with an eerie groan. Shadows slink from its darkness, heralding the arrival of the next adversaries.")
+            print("\nFrom the obscurity emerges a duo, clad in armor etched with glyphs of ancient curses. Their eyes burn with an unnerving hunger, fixed upon the prisoner as they advance step by deliberate step.")
+            print("\nThe first challenger, a towering figure wielding a massive two-handed sword, roars a challenge that reverberates off the arena walls. Their every movement exudes lethal intent, leaving no room for mercy.")
+            print("\nWith a swift motion, they swing their blade in a sweeping arc aimed at the prisoner's midsection, the sheer force threatening to cleave through armor and bone alike.")
+
+
     def start_introduction(self):
         print("\nThe first thing you notice as you regain consciousness is the cold, unyielding stone beneath you. The air is thick with the scent of dust and decay, and the only sound is the distant echo of your own heartbeat.")
         print("\nYou open your eyes to find yourself in a dimly lit chamber, the walls lined with ancient runes and symbols that seem to pulse with an otherworldly energy. As you struggle to your feet, you realize that you have no memory of how you came to be here, or even who you are.")
@@ -58,11 +65,13 @@ class GameIntroduction:
 
         self.set_weapon()
 
-        print("\nAhh, the prisoner has chosen his weapon. Very well, let us proceed to the arena where your fate shall be decided.")
-        print("\nYou are dragged through a series of winding corridors, the torchlight flickering off the ancient stones. The air grows colder with each step, and the sense of foreboding in your chest deepens.")
-        print("\nFinally, you emerge into a vast, circular chamber, the walls lined with towering statues and the floor covered in sand and bloodstains. The crowd roars as you are led to the center of the arena, the sound echoing in your ears like thunder.")
-        print("\nYou steel yourself for the battle to come, your heart pounding in your chest. The figure who spoke before steps forward once more, their voice ringing out over the crowd.")
+        print("\nAhh, the prisoner has chosen their weapon. Very well, let us proceed to the arena where their fate shall be decided.")
+        print("\nThey are dragged through a series of winding corridors, the torchlight flickering off the ancient stones. The air grows colder with each step, and the sense of foreboding in their chest deepens.")
+        print("\nFinally, they emerge into a vast, circular chamber, the walls lined with towering statues and the floor covered in sand and bloodstains. The crowd roars as they are led to the center of the arena, the sound echoing in their ears like thunder.")
+        print("\nThey steel themselves for the battle to come, their heart pounding in their chest. The figure who spoke before steps forward once more, their voice ringing out over the crowd.")
         print("\n'Let the battle begin!'")
+
+        self.continue_arena()
 
         # name selection logic.
         # for attempt in range(3):
