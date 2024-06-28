@@ -1,22 +1,10 @@
 """Game Introduction Module"""
 from characters.inventory import PlayerInventory
-import sys
 
 class GameIntroduction:
     def __init__(self):
         self.player_name = ""
         self.player_inventory = PlayerInventory()
-
-    def shun_player(self):
-        print("Cowardice does not become you. The world has no place for those who shirk from destiny. Begone, and let the true heroes forge their path without you.")
-        sys.exit(0)
-
-    def get_player_name(self):
-        return self.player_name
-
-    def set_player_name(self):
-        self.player_name = input("Enter your name, hero: ")
-        print(f"\nWelcome, {self.player_name}! Your journey begins now. May the gods watch over you as you face the trials that await...")
 
     def set_weapon(self):
         while True:
@@ -63,15 +51,3 @@ class GameIntroduction:
         print("\nFinally, you emerge into a vast, circular chamber, the walls lined with towering statues and the floor covered in sand and bloodstains. The crowd roars as you are led to the center of the arena, the sound echoing in your ears like thunder.")
         print("\nYou steel yourself for the battle to come, your heart pounding in your chest. The figure who spoke before steps forward once more, their voice ringing out over the crowd.")
         print("\n'Let the battle begin!'")
-
-        # name selection logic.
-        # for attempt in range(3):
-        #     response = input("\nDo you dare to embrace your destiny? (yes/no): ").lower().strip()
-        #     if response == "yes":
-        #         print("\nThen let the winds of fate guide you.")
-        #         self.set_player_name()
-        #         break
-        #     elif attempt == 2:
-        #         self.shun_player()
-        #     else:
-        #         print("\nHesitation is but the first step towards defeat. The sands of time wait for no one. Choose wisely, for this is your final chance.")
