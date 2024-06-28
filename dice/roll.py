@@ -1,3 +1,5 @@
+"""Dice rolling module"""
+
 import random
 
 
