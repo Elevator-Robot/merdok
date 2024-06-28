@@ -19,11 +19,19 @@ class GameIntroduction:
         print(f"\nWelcome, {self.player_name}! Your journey begins now. May the gods watch over you as you face the trials that await...")
 
     def set_weapon(self):
+        valid_weapons = ["sword", "bow", "staff", "axe"]
         while True:
-            weapon_choice = input("\nChoose your weapon (sword/bow/staff): ").lower().strip()
-            if weapon_choice in ["sword", "bow", "staff"]:
-                self.player_inventory.add_weapon(weapon_choice, damage=4)
-                print(f"\nYou feel the rush of power as you wield the {weapon_choice}. Blood rushes through your veins... +4 strength has been added to your stats.")
+            weapon_choice = input("\nChoose your weapon (sword/bow/staff/axe): ").lower().strip()
+            if weapon_choice in valid_weapons:
+                if weapon_choice == "sword" or weapon_choice == "axe":
+                    self.player_inventory.add_weapon(weapon_choice, damage=4)
+                    print(f"\nYou feel the weight of the {weapon_choice} in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
+                elif weapon_choice == "bow":
+                    self.player_inventory.add_weapon(weapon_choice, damage=4)
+                    print("\nYou feel the tension of the bowstring as you draw it back, the arrow poised to strike. +4 strength has been added to your stats.")
+                elif weapon_choice == "staff":
+                    self.player_inventory.add_weapon(weapon_choice, damage=4)
+                    print("\nYou feel the power of the staff coursing through your veins, the magic within it waiting to be unleashed. +2 intellegence has been added to your stats.")
                 break
             else:
                 print("\nThat is not a weapon of choice prisoner. Choose again.")
