@@ -1,5 +1,4 @@
 import time
-import sys
 
 from characters.inventory import PlayerInventory
 
@@ -7,18 +6,6 @@ class GameIntroduction:
     def __init__(self):
         self.player_name = ""
         self.player_inventory = PlayerInventory()
-
-    def shun_player(self):
-        print("\nCowardice does not become you. The world has no place for those who shirk from destiny. Begone, and let the true heroes forge their path without you.")
-        sys.exit(0)
-
-    def get_player_name(self):
-        return self.player_name
-
-    def set_player_name(self):
-        self.player_name = input("\nEnter your name, hero: ")
-        print(f"\nWelcome, {self.player_name}! Your journey begins now. May the gods watch over you as you face the trials that await...")
-        time.sleep(2)  # Pause for 2 seconds before continuing
 
     def set_weapon(self):
         print("\n'You may choose 1 weapon to try and salvage your life... Choose wisely.'")
