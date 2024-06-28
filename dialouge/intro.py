@@ -23,9 +23,9 @@ class GameIntroduction:
             weapon_choice = input("""
                                 \nChoose your weapon:
                                 \n 1: sword
-                                \n 2: bow
-                                \n 3: staff
-                                \n 4: axe
+                                \n 2: axe
+                                \n 3: bow
+                                \n 4: staff
                                 \n Enter number:""").lower().strip()
             match weapon_choice:
                 case "1":
