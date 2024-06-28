@@ -11,7 +11,6 @@ class PlayerInventory:
     def _save_inventory_to_json(self, filename):
         with open(filename, 'w') as f:
             json.dump(self.inventory, f, indent=4)
-        print(f"Inventory saved to {filename}")
 
     def add_weapon(self, weapon_name, damage):
         weapon = {
