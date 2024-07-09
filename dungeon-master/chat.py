@@ -1,13 +1,14 @@
-from openai import OpenAI as openai
+from openai import OpenAI
 from os import environ
 
 class DragonChatHandler:
     def __init__(self, api_key):
         self.api_key = api_key
-        openai.api_key = self.api_key
+        OpenAI.api_key = self.api_key
+        self.mr_robot = OpenAI()
 
     def send_message(self, message, model="text-davinci-003"):
-        response = openai.chat.completions.create(
+        response = self.mr_robot.chat.completions.create(
             model=model,
             messages=[
                 {
