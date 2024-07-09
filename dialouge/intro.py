@@ -2,6 +2,7 @@ import textwrap
 import time
 
 from characters import enemy, player
+from characters.character import CharacterStats
 from characters.inventory import PlayerInventory
 from dice.roll import Dice
 
@@ -12,6 +13,7 @@ class GameIntroduction:
         self.dice = Dice()
         self.player = player.Player(health=10, name="Prisoner")
         self.enemy = enemy.Enemy(health=10, name="Champion")
+        self.character_stats = CharacterStats()
 
     def format_text(self, text, wait=2):
         for line in textwrap.wrap(text, width=100):
@@ -33,19 +35,23 @@ Choose your weapon:
 Enter number: """).strip()
             if weapon_choice == "1":
                 self.player_inventory.add_weapon("sword", damage=4)
+                self.character_stats.update_stat("strength", 4)
                 self.format_text("You feel the weight of the sword in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
                 break
             elif weapon_choice == "2":
                 self.player_inventory.add_weapon("axe", damage=4)
+                self.character_stats.update_stat("strength", 4)
                 self.format_text("You feel the weight of the axe in your hand, the blade gleaming in the torchlight. +4 strength has been added to your stats.")
                 break
             elif weapon_choice == "3":
                 self.player_inventory.add_weapon("bow", damage=4)
-                self.format_text("You feel the tension of the bowstring as you draw it back, the arrow poised to strike. +4 strength has been added to your stats.")
+                self.character_stats.update_stat("dexterity", 4)
+                self.format_text("You feel the tension of the bowstring as you draw it back, the arrow poised to strike. +4 dexterity has been added to your stats.")
                 break
             elif weapon_choice == "4":
                 self.player_inventory.add_weapon("staff", damage=4)
-                self.format_text("You feel the power of the staff coursing through your veins, the magic within it waiting to be unleashed. +2 intelligence has been added to your stats.")
+                self.character_stats.update_stat("intelligence", 4)
+                self.format_text("You feel the power of the staff coursing through your veins, the magic within it waiting to be unleashed. +4 intelligence has been added to your stats.")
                 break
             else:
                 self.format_text("That is not a valid weapon choice. Choose again.")

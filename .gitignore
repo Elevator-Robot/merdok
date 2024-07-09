@@ -134,3 +134,4 @@ cython_debug/
 # Player files
 player_inventory.json
 player_stats.json
+character_stats.json
