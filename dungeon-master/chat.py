@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 from mypy_boto3_bedrock_runtime.client import BedrockRuntimeClient as BedrockClient
 from typing import cast
 
+# Setup logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
@@ -45,6 +46,11 @@ class DragonChatHandler:
 
 if __name__ == "__main__":
     chat_handler = DragonChatHandler("us-east-1")
-    initial_message = "You are a knight in the kingdom of Larion. You are questing to defeat the dragon and save the kingdom."
-    response = chat_handler.start_conversation(initial_message)
-    print(json.dumps(response, indent=4))
+
+    # Continue the conversation in a loop
+    while True:
+        user_input = input("Input message: ")
+        response = chat_handler.continue_conversation(user_input)
+        response_string = response["content"][0]["text"]
+
+        print(f"{response_string}\n")
