@@ -1,9 +1,12 @@
 import json
 import boto3
 import logging
+import pyaudio
 from botocore.exceptions import ClientError
 from mypy_boto3_bedrock_runtime.client import BedrockRuntimeClient as BedrockClient
 from typing import cast
+from pydub import AudioSegment
+from io import BytesIO
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -12,6 +15,7 @@ logging.basicConfig(level=logging.INFO)
 class DragonChatHandler:
     def __init__(self, region: str):
         self.client = cast(BedrockClient, boto3.client("bedrock-runtime", region_name=region))
+        self.polly_client = boto3.client('polly', region_name=region)
 
     def generate_message(self, model_id, system_prompt, messages, max_tokens):
         body = json.dumps({
@@ -44,6 +48,35 @@ class DragonChatHandler:
     def continue_conversation(self, message):
         return self.send_message(message)
 
+    def speak_response(self, response_string):
+        response = self.polly_client.synthesize_speech(
+            Text=response_string,
+            OutputFormat='mp3',
+            VoiceId='Joanna'
+        )
+
+        if "AudioStream" in response:
+            # Convert MP3 to PCM using pydub
+            audio_stream = response['AudioStream'].read()
+            sound = AudioSegment.from_mp3(BytesIO(audio_stream))
+            raw_data = sound.raw_data
+            sample_width = sound.sample_width
+            channels = sound.channels
+            frame_rate = sound.frame_rate
+
+            # Play the audio
+            p = pyaudio.PyAudio()
+            stream = p.open(format=p.get_format_from_width(sample_width),
+                            channels=channels,
+                            rate=frame_rate,
+                            output=True)
+
+            stream.write(raw_data)
+
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+
 if __name__ == "__main__":
     chat_handler = DragonChatHandler("us-east-1")
 
@@ -54,3 +87,4 @@ if __name__ == "__main__":
         response_string = response["content"][0]["text"]
 
         print(f"{response_string}\n")
+        chat_handler.speak_response(response_string)
