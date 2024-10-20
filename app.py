@@ -30,6 +30,7 @@ class MerdokStack(Stack):
             billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
             stream=dynamodb.StreamViewType.NEW_IMAGE
         )
+        chat_table.apply_removal_policy(cdk.RemovalPolicy.DESTROY)
 
         # IAM Role for Bedrock Agent
         bedrock_agent_service_role = iam.Role(self, "BedrockAgentServiceRole",
