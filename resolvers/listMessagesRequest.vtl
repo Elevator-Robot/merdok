@@ -1,0 +1,13 @@
+{
+    "version": "2018-05-29",
+    "operation": "Query",
+    "query": {
+        "expression": "chatSessionId = :chatSessionId",
+        "expressionValues": {
+            ":chatSessionId": {
+                "S": "$context.arguments.chatSessionId"
+            }
+        }
+    },
+    "scanIndexForward": true
+}

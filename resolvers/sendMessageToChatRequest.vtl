@@ -1,8 +1,20 @@
 {
-    "operation": "Invoke",
-    "payload": {
-        "chatSessionId": "$context.arguments.chatSessionId",
-        "userId": "$context.arguments.userId",
-        "content": "$context.arguments.content"
+    "version": "2018-05-29",
+    "operation": "PutItem",
+    "key": {
+        "chatSessionId": {
+            "S": "$context.arguments.chatSessionId"
+        },
+        "timestamp": {
+            "S": "$util.time.nowISO8601()"
+        }
+    },
+    "attributeValues": {
+        "message": {
+            "S": "$context.arguments.message"
+        },
+        "sender": {
+            "S": "$context.arguments.sender"
+        }
     }
 }

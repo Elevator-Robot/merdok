@@ -1,1 +1,9 @@
-$util.toJson($context.result)
+#if($ctx.error)
+    $util.error($ctx.error.message, $ctx.error.type)
+#end
+{
+    "chatSessionId": "$ctx.result.chatSessionId",
+    "timestamp": "$ctx.result.timestamp",
+    "message": "$ctx.result.message",
+    "sender": "$ctx.result.sender"
+}

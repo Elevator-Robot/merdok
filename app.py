@@ -10,6 +10,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 from aws_cdk.aws_iam import IPrincipal
+from aws_cdk.aws_lambda_event_sources import DynamoEventSource
 
 class MerdokStack(Stack):
 
@@ -26,7 +27,8 @@ class MerdokStack(Stack):
                 name="timestamp",
                 type=dynamodb.AttributeType.STRING
             ),
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            stream=dynamodb.StreamViewType.NEW_IMAGE
         )
 
         # IAM Role for Bedrock Agent
@@ -77,6 +79,13 @@ class MerdokStack(Stack):
         # Grant DynamoDB Permissions to Lambda
         chat_table.grant_read_write_data(bedrock_lambda)
 
+        # Add DynamoDB Stream as Event Source for Lambda
+        bedrock_lambda.add_event_source(
+            DynamoEventSource(chat_table,
+                starting_position=_lambda.StartingPosition.LATEST,
+            )
+        )
+
         # AppSync API Definition
         api = appsync.CfnGraphQLApi(self, "MerdokApi",
             name="MerdokApi",
@@ -100,7 +109,30 @@ class MerdokStack(Stack):
             definition=open("schema.graphql").read()
         )
 
-        # Lambda Data Source for AppSync
+        # Chat Table Data Source for AppSync
+        chat_table_data_source = appsync.CfnDataSource(self, "ChatTableDataSource",
+            api_id=api.attr_api_id,
+            name="ChatTableDataSource",
+            type="AMAZON_DYNAMODB",
+            dynamo_db_config=appsync.CfnDataSource.DynamoDBConfigProperty(
+                table_name=chat_table.table_name,
+                aws_region=self.region
+            ),
+            service_role_arn=bedrock_agent_service_role.role_arn
+        )
+
+        list_messages_resolver = appsync.CfnResolver(self, "ListMessagesResolver",
+            api_id=api.attr_api_id,
+            type_name="Query",
+            field_name="listMessages",
+            data_source_name=chat_table_data_source.name,
+            request_mapping_template=open("resolvers/listMessagesRequest.vtl").read(),
+            response_mapping_template=open("resolvers/listMessagesResponse.vtl").read(),
+        )
+
+        list_messages_resolver.node.add_dependency(chat_table_data_source)
+
+        # Lambda Data Source for AppSync (already exists)
         lambda_data_source = appsync.CfnDataSource(self, "LambdaDataSource",
             api_id=api.attr_api_id,
             name="LambdaDataSource",
@@ -111,8 +143,8 @@ class MerdokStack(Stack):
             service_role_arn=bedrock_agent_service_role.role_arn
         )
 
-        # Example Resolver for sendMessageToChat
-        resolver = appsync.CfnResolver(self, "SendMessageToChatResolver",
+        # Resolver for sendMessageToChat mutation
+        send_message_resolver = appsync.CfnResolver(self, "SendMessageToChatResolver",
             api_id=api.attr_api_id,
             type_name="Mutation",
             field_name="sendMessageToChat",
@@ -121,7 +153,8 @@ class MerdokStack(Stack):
             response_mapping_template=open("resolvers/sendMessageToChatResponse.vtl").read(),
         )
 
-        resolver.node.add_dependency(lambda_data_source)
+        # Make resolver dependent on the Lambda data source
+        send_message_resolver.node.add_dependency(lambda_data_source)
 
 app = cdk.App()
 MerdokStack(app, "MerdokStack")
