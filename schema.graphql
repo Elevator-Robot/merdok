@@ -1,0 +1,29 @@
+type ChatSession {
+    chatSessionId: ID!
+    userId: ID!
+    createdAt: AWSDateTime!
+}
+
+type Message {
+    messageId: ID!
+    chatSessionId: ID!
+    userId: ID!
+    content: String!
+    timestamp: AWSDateTime!
+    isBotResponse: Boolean!
+}
+
+type Query {
+    getChatResponse(chatSessionId: ID!, messageId: ID!): Message
+    listMessages(chatSessionId: ID!): [Message!]!
+    getChatSession(chatSessionId: ID!): ChatSession
+}
+
+type Mutation {
+    startNewChatSession(userId: ID!): ChatSession!
+    sendMessageToChat(
+        chatSessionId: ID!
+        userId: ID!
+        content: String!
+    ): Message!
+}
