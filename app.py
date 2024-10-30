@@ -56,9 +56,8 @@ class MerdokStack(Stack):
             agent_name="MerdokAgent",
             description="Merdok Agent",
             foundation_model=bedrock.FoundationModel.from_foundation_model_id(
-                self,
-                "FoundationModel",
-                bedrock.FoundationModelIdentifier.ANTHROPIC_CLAUDE_3_5_SONNET_20240620_V1_0,
+                self, "FoundationModel",
+                bedrock.FoundationModelIdentifier.ANTHROPIC_CLAUDE_3_SONNET_20240229_V1_0,
             ).model_id,
             instruction=(
                 "You are the Dungeon Master, guiding adventurers on their expeditions. Be clever and clear in your instructions. "
