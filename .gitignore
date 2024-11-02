@@ -135,3 +135,4 @@ cython_debug/
 cdk.out/
 cdk.context.json
 .tmp/
+.aider*
