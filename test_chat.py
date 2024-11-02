@@ -2,42 +2,44 @@ import boto3
 import requests
 import json
 import os
-from datetime import datetime
+import dotenv
+
+dotenv.load_dotenv()
 
 # Cognito Pool constants
-USER_POOL_ID = 'us-east-1_jq7L9L7CH'
-CLIENT_ID = 'your-client-id'  # You'll need to add your app client ID
-TEST_USERNAME = 'your-test-username'
-TEST_PASSWORD = 'your-test-password'
+USER_POOL_ID = "us-east-1_jq7L9L7CH"
+CLIENT_ID = "q9ql4rmsu26d7tskkc8a9bm17"
+TEST_USERNAME = os.getenv("COGNITO_USERNAME")
+TEST_PASSWORD = os.getenv("COGNITO_PASSWORD")
+
 
 def get_cognito_token():
     """Get authentication token from Cognito"""
-    client = boto3.client('cognito-idp')
-    
+    client = boto3.client("cognito-idp")
+
     try:
         response = client.initiate_auth(
-            AuthFlow='USER_PASSWORD_AUTH',
-            AuthParameters={
-                'USERNAME': TEST_USERNAME,
-                'PASSWORD': TEST_PASSWORD
-            },
-            ClientId=CLIENT_ID
+            AuthFlow="USER_PASSWORD_AUTH",  # valid options: [ADMIN_NO_SRP_AUTH, ADMIN_USER_PASSWORD_AUTH, USER_SRP_AUTH, REFRESH_TOKEN_AUTH, REFRESH_TOKEN, CUSTOM_AUTH, USER_PASSWORD_AUTH, USER_AUTH]
+            AuthParameters={"USERNAME": TEST_USERNAME, "PASSWORD": TEST_PASSWORD},
+            ClientId=CLIENT_ID,
         )
-        return response['AuthenticationResult']['IdToken']
+        return response["AuthenticationResult"]["IdToken"]
     except Exception as e:
         print(f"Authentication error: {str(e)}")
         raise
+
 
 def get_api_details():
     """Get AppSync API URL"""
     client = boto3.client("appsync")
     response = client.list_graphql_apis()
-    
+
     # Get the first API (assuming it's our chat API)
     api = response["graphqlApis"][0]
     api_url = api["uris"]["GRAPHQL"]
-    
+
     return api_url
+
 
 def send_test_message():
     api_url = get_api_details()
@@ -62,10 +64,7 @@ def send_test_message():
     """
 
     # Headers for the request with Cognito token
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": token
-    }
+    headers = {"Content-Type": "application/json", "Authorization": token}
 
     # Make the request
     response = requests.post(api_url, headers=headers, json={"query": mutation})
