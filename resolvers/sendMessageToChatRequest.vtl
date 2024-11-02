@@ -2,19 +2,13 @@
     "version": "2018-05-29",
     "operation": "PutItem",
     "key": {
-        "chatSessionId": {
-            "S": "$context.arguments.chatSessionId"
-        },
-        "timestamp": {
-            "S": "$util.time.nowISO8601()"
-        }
+        "messageId": { "S": "$util.autoId()" },
+        "chatSessionId": { "S": "$context.arguments.chatSessionId" }
     },
     "attributeValues": {
-        "message": {
-            "S": "$context.arguments.message"
-        },
-        "sender": {
-            "S": "$context.arguments.sender"
-        }
+        "userId": { "S": "$context.arguments.userId" },
+        "content": { "S": "$context.arguments.content" },
+        "timestamp": { "S": "$util.time.nowISO8601()" },
+        "isBotResponse": { "BOOL": false }
     }
 }
