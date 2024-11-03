@@ -64,7 +64,7 @@ def send_test_message():
     """
 
     # Headers for the request with Cognito token
-    headers = {"Content-Type": "application/json", "Authorization": token}
+    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
 
     # Make the request
     response = requests.post(api_url, headers=headers, json={"query": mutation})
