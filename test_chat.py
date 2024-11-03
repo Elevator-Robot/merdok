@@ -44,7 +44,11 @@ def get_api_details():
 def send_test_message():
     api_url = get_api_details()
     token = get_cognito_token()
-
+    
+    # Debug prints
+    print(f"API URL: {api_url}")
+    print(f"Token (first 50 chars): {token[:50]}...")
+    
     # GraphQL mutation
     mutation = """
     mutation SendMessage {
@@ -64,10 +68,20 @@ def send_test_message():
     """
 
     # Headers for the request with Cognito token
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
-
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
+    
+    # Debug prints
+    print("Headers:", json.dumps(headers, indent=2))
+    
     # Make the request
     response = requests.post(api_url, headers=headers, json={"query": mutation})
+    
+    # Debug response
+    print(f"Response Status Code: {response.status_code}")
+    print("Response Headers:", json.dumps(dict(response.headers), indent=2))
 
     # Print the response
     print(json.dumps(response.json(), indent=2))
