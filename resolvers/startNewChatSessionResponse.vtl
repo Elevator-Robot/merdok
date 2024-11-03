@@ -1,0 +1,11 @@
+#if($ctx.error)
+    $util.error($ctx.error.message, $ctx.error.type)
+#elseif($ctx.result == null)
+    $util.error("Failed to create chat session", "NullResponseError")
+#else
+    $util.toJson({
+        "chatSessionId": $ctx.result.chatSessionId.S,
+        "userId": $ctx.result.userId.S,
+        "createdAt": $ctx.result.createdAt.S
+    })
+#end
