@@ -1,36 +1,187 @@
+from aws_cdk import RemovalPolicy, Stack
+from aws_cdk.aws_appsync import (
+    CfnGraphQLSchema,
+    CfnGraphQLApi,
+    CfnApiKey,
+    CfnDataSource,
+    CfnResolver,
+)
+from aws_cdk.aws_dynamodb import (
+    Table,
+    Attribute,
+    AttributeType,
+    StreamViewType,
+    BillingMode,
+)
+from aws_cdk.aws_iam import Role, ServicePrincipal, ManagedPolicy
+from constructs import Construct
 from typing import cast, Any
 import aws_cdk as cdk
 from aws_cdk import (
-    Stack,
     aws_bedrock as bedrock,
     aws_iam as iam,
-    aws_lambda as _lambda,
-    aws_dynamodb as dynamodb,
     aws_appsync as appsync,
 )
-from constructs import Construct
 from aws_cdk.aws_iam import IPrincipal
-from aws_cdk.aws_lambda_event_sources import DynamoEventSource
 
 
 class MerdokStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs: Any) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        # DynamoDB Table for Chat Sessions
-        chat_table = dynamodb.Table(
+        ############################################
+        #### DynamoDB Table
+        ############################################
+
+        # Create the DynamoDB table for messages
+        messages_table = Table(
             self,
-            "ChatTable",
-            partition_key=dynamodb.Attribute(
-                name="chatSessionId", type=dynamodb.AttributeType.STRING
-            ),
-            sort_key=dynamodb.Attribute(
-                name="timestamp", type=dynamodb.AttributeType.STRING
-            ),
-            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
-            stream=dynamodb.StreamViewType.NEW_IMAGE,
+            "MessagesTable",
+            partition_key=Attribute(name="conversationId", type=AttributeType.STRING),
+            sort_key=Attribute(name="id", type=AttributeType.STRING),
+            billing_mode=BillingMode.PAY_PER_REQUEST,
+            stream=StreamViewType.NEW_IMAGE,
+            removal_policy=RemovalPolicy.DESTROY,  # For development only
         )
-        chat_table.apply_removal_policy(cdk.RemovalPolicy.DESTROY)
+        messages_table.apply_removal_policy(cdk.RemovalPolicy.DESTROY)
+
+        # Create the AppSync API
+        chat_api = CfnGraphQLApi(
+            self, "ChatApi", name="chat-api", authentication_type="API_KEY"
+        )
+
+        # Create API Key
+        CfnApiKey(self, "ChatApiKey", api_id=chat_api.attr_api_id)
+
+        # Define schema
+        api_schema = CfnGraphQLSchema(
+            self,
+            "ChatSchema",
+            api_id=chat_api.attr_api_id,
+            definition="""\
+                type Message {
+                    id: ID!
+                    conversationId: String!
+                    content: String!
+                    sender: String!
+                    timestamp: String!
+                }
+                type Query {
+                    getConversation(conversationId: String!): [Message]
+                    listConversations: [Message]
+                }
+                input SendMessageInput {
+                    conversationId: String!
+                    content: String!
+                    sender: String!
+                }
+                type Mutation {
+                    sendMessage(input: SendMessageInput!): Message
+                }
+                type Schema {
+                    query: Query
+                    mutation: Mutation
+                }""",
+        )
+
+        # Create IAM role for DynamoDB access
+        dynamodb_role = Role(
+            self,
+            "ChatDynamoDBRole",
+            assumed_by=ServicePrincipal("appsync.amazonaws.com"),
+        )
+
+        dynamodb_role.add_managed_policy(
+            ManagedPolicy.from_aws_managed_policy_name("AmazonDynamoDBFullAccess")
+        )
+
+        ############################################
+        #### AppSync Resolvers
+        ############################################
+
+        # Create DynamoDB data source
+        messages_ds = CfnDataSource(
+            self,
+            "MessagesDataSource",
+            api_id=chat_api.attr_api_id,
+            name="MessagesDynamoDataSource",
+            type="AMAZON_DYNAMODB",
+            dynamo_db_config=CfnDataSource.DynamoDBConfigProperty(
+                table_name=messages_table.table_name, aws_region=self.region
+            ),
+            service_role_arn=dynamodb_role.role_arn,
+        )
+
+        # Create resolvers
+        get_conversation_resolver = CfnResolver(
+            self,
+            "GetConversationQueryResolver",
+            api_id=chat_api.attr_api_id,
+            type_name="Query",
+            field_name="getConversation",
+            data_source_name=messages_ds.attr_name,
+            request_mapping_template="""\
+            {
+                "version": "2017-02-28",
+                "operation": "Query",
+                "query": {
+                    "expression": "conversationId = :conversationId",
+                    "expressionValues": {
+                        ":conversationId": $util.dynamodb.toDynamoDBJson($ctx.args.conversationId)
+                    }
+                }
+            }""",
+            response_mapping_template="$util.toJson($ctx.result.items)",
+        )
+        get_conversation_resolver.add_depends_on(api_schema)
+        get_conversation_resolver.add_depends_on(messages_ds)
+
+        list_conversations_resolver = CfnResolver(
+            self,
+            "ListConversationsQueryResolver",
+            api_id=chat_api.attr_api_id,
+            type_name="Query",
+            field_name="listConversations",
+            data_source_name=messages_ds.attr_name,
+            request_mapping_template="""\
+            {
+                "version": "2017-02-28",
+                "operation": "Scan"
+            }""",
+            response_mapping_template="$util.toJson($ctx.result.items)",
+        )
+        list_conversations_resolver.add_depends_on(api_schema)
+        list_conversations_resolver.add_depends_on(messages_ds)
+
+        send_message_resolver = CfnResolver(
+            self,
+            "SendMessageMutationResolver",
+            api_id=chat_api.attr_api_id,
+            type_name="Mutation",
+            field_name="sendMessage",
+            data_source_name=messages_ds.attr_name,
+            request_mapping_template="""\
+            {
+                "version": "2017-02-28",
+                "operation": "PutItem",
+                "key": {
+                    "conversationId": $util.dynamodb.toDynamoDBJson($ctx.args.input.conversationId),
+                    "id": $util.dynamodb.toDynamoDBJson($util.autoId())
+                },
+                "attributeValues": {
+                    "content": $util.dynamodb.toDynamoDBJson($ctx.args.input.content),
+                    "sender": $util.dynamodb.toDynamoDBJson($ctx.args.input.sender),
+                    "timestamp": $util.dynamodb.toDynamoDBJson($util.time.nowISO8601())
+                }
+            }""",
+            response_mapping_template="$util.toJson($ctx.result)",
+        )
+        send_message_resolver.add_depends_on(api_schema)
+        send_message_resolver.add_depends_on(messages_ds)
+
+        ############################################
+        ### Bedrock Agent
+        ############################################
 
         # IAM Role for Bedrock Agent
         bedrock_agent_service_role = iam.Role(
@@ -72,60 +223,13 @@ class MerdokStack(Stack):
             agent_resource_role_arn=bedrock_agent_service_role.role_arn,
         )
 
-        # AppSync API Definition
-        api = appsync.CfnGraphQLApi(
-            self,
-            "MerdokApi",
-            name="MerdokApi",
-            authentication_type="AMAZON_COGNITO_USER_POOLS",
-            xray_enabled=True,
-            user_pool_config=appsync.CfnGraphQLApi.UserPoolConfigProperty(
-                user_pool_id="us-east-1_jq7L9L7CH",
-                aws_region="us-east-1",
-                default_action="ALLOW",
-            ),
-        )
-
         # Output the value of api.ref
         cdk.CfnOutput(
             self,
             "GraphQLApiId",
-            value=api.attr_api_id,
+            value=chat_api.attr_api_id,
             description="The ID of the AppSync GraphQL API",
         )
-        # GraphQL Schema
-        appsync.CfnGraphQLSchema(
-            self,
-            "MerdokSchema",
-            api_id=api.attr_api_id,
-            definition=open("schema.graphql").read(),
-        )
-
-        # Chat Table Data Source for AppSync
-        chat_table_data_source = appsync.CfnDataSource(
-            self,
-            "ChatTableDataSource",
-            api_id=api.attr_api_id,
-            name="ChatTableDataSource",
-            type="AMAZON_DYNAMODB",
-            dynamo_db_config=appsync.CfnDataSource.DynamoDBConfigProperty(
-                table_name=chat_table.table_name, aws_region=self.region
-            ),
-            service_role_arn=bedrock_agent_service_role.role_arn,
-        )
-
-        list_messages_resolver = appsync.CfnResolver(
-            self,
-            "ListMessagesResolver",
-            api_id=api.attr_api_id,
-            type_name="Query",
-            field_name="listMessages",
-            data_source_name=chat_table_data_source.name,
-            request_mapping_template=open("resolvers/listMessagesRequest.vtl").read(),
-            response_mapping_template=open("resolvers/listMessagesResponse.vtl").read(),
-        )
-
-        list_messages_resolver.node.add_dependency(chat_table_data_source)
 
 
 app = cdk.App()
