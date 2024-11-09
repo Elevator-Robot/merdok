@@ -136,3 +136,5 @@ cdk.out/
 cdk.context.json
 .tmp/
 .aider*
+
+merdok-api-docs/collection.bru

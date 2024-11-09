@@ -5,7 +5,16 @@ meta {
 }
 
 post {
-  url: 
-  body: none
-  auth: none
+  url: https://lfriztrn7fhv3fp2jxpdjogj3u.appsync-api.us-east-1.amazonaws.com/graphql
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation MyMutation {
+    sendMessage(
+      input: { content: "HELLLOOOOOO", conversationId: "1234", sender: "Aaron" }
+    )
+  }
+  
 }
