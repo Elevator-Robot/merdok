@@ -179,6 +179,52 @@ class MerdokStack(Stack):
         send_message_resolver.add_depends_on(api_schema)
         send_message_resolver.add_depends_on(messages_ds)
 
+
+        ############################################
+        ### Lambda Function
+        ############################################
+        lambda_role = iam.Role(
+            self,
+            "DynamoStreamLambdaRole",
+            assumed_by=ServicePrincipal("lambda.amazonaws.com"),
+        )
+
+        lambda_role.add_managed_policy(
+            ManagedPolicy.from_aws_managed_policy_name(
+                "service-role/AWSLambdaBasicExecutionRole"
+            )
+        )
+
+        lambda_role.add_to_policy(
+            iam.PolicyStatement(
+                effect=iam.Effect.ALLOW,
+                actions=[
+                    "bedrock:*",
+                ],
+                resources=["*"],
+            )
+        )
+
+        dynamo_stream_lambda = cdk.aws_lambda.Function(
+            self,
+            "DynamoStreamLambda",
+            runtime=cdk.aws_lambda.Runtime.PYTHON_3_12,
+            handler="lambda_function.lambda_handler",
+            code=cdk.aws_lambda.Code.from_asset("lambda"),
+            environment={"TABLE_NAME": messages_table.table_name},
+        )
+
+        # event source mapping
+        dynamo_stream_lambda.add_event_source(
+            cdk.aws_lambda_event_sources.DynamoEventSource(
+                messages_table,
+                starting_position=cdk.aws_lambda.StartingPosition.TRIM_HORIZON,
+                batch_size=1,
+                bisect_batch_on_error=True,
+                retry_attempts=5,
+            )
+        )
+
         ############################################
         ### Bedrock Agent
         ############################################
