@@ -222,6 +222,7 @@ class MerdokStack(Stack):
                 batch_size=1,
                 bisect_batch_on_error=True,
                 retry_attempts=5,
+                filters=[{'eventName': ['INSERT']}]
             )
         )
 
