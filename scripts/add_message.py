@@ -30,7 +30,7 @@ class MessageSender:
 
 if __name__ == "__main__":
     message_sender = MessageSender(
-        "GraphqlLabStack-MessagesTable05B58A27-19E57EYMYG06E"
+        "GraphqlLabStack-MessagesTable05B58A27-1P6B7UXCFKWBG"
     )
     message = message_sender.send_message(
         "b2eb0531-a6aa-4c7d-81bb-74f41d99a199", "Are you alive?", "Bob"
