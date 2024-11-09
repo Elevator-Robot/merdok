@@ -1,0 +1,17 @@
+meta {
+  name: list-conversations
+  type: graphql
+  seq: 3
+}
+
+post {
+  url: https://lfriztrn7fhv3fp2jxpdjogj3u.appsync-api.us-east-1.amazonaws.com/graphql
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  query MyQuery { listConversations { content conversationId id sender timestamp } }
+  
+  
+}
