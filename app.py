@@ -179,7 +179,6 @@ class MerdokStack(Stack):
         send_message_resolver.add_depends_on(api_schema)
         send_message_resolver.add_depends_on(messages_ds)
 
-
         ############################################
         ### Lambda Function
         ############################################
@@ -209,7 +208,7 @@ class MerdokStack(Stack):
             self,
             "DynamoStreamLambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_12,
-            handler="lambda_function.lambda_handler",
+            handler="app.lambda_handler",
             code=cdk.aws_lambda.Code.from_asset("lambda"),
             environment={"TABLE_NAME": messages_table.table_name},
         )
@@ -222,9 +221,7 @@ class MerdokStack(Stack):
                 batch_size=1,
                 bisect_batch_on_error=True,
                 retry_attempts=5,
-                filters=[{
-                    "pattern": '{"eventName": ["INSERT"]}'
-                }]
+                filters=[{"pattern": '{"eventName": ["INSERT"]}'}],
             )
         )
 
