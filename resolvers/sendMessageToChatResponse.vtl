@@ -1,0 +1,7 @@
+#if($ctx.error)
+    $util.error($ctx.error.message, $ctx.error.type)
+#elseif($ctx.result == null)
+    $util.error("No valid response received from Lambda function", "NullResponseError")
+#else
+    $util.toJson($ctx.result)
+#end

@@ -1,0 +1,14 @@
+{
+    "version": "2018-05-29",
+    "operation": "PutItem",
+    "key": {
+        "messageId": $util.dynamodb.toDynamoDBJson($util.autoId()),
+        "chatSessionId": $util.dynamodb.toDynamoDBJson($context.arguments.chatSessionId)
+    },
+    "attributeValues": {
+        "userId": $util.dynamodb.toDynamoDBJson($context.arguments.userId),
+        "content": $util.dynamodb.toDynamoDBJson($context.arguments.content),
+        "timestamp": $util.dynamodb.toDynamoDBJson($util.time.nowISO8601()),
+        "isBotResponse": $util.dynamodb.toDynamoDBJson(false)
+    }
+}
